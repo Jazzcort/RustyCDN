@@ -1,0 +1,31 @@
+#!/usr/bin/env python3
+
+import argparse, subprocess
+
+parser = argparse.ArgumentParser(
+                    prog='deployCDN',
+                    description='Deploy CDN system to several cloud instances',
+                    epilog='./deployCDN [-p port] [-o origin] [-n name] [-u username] [-i keyfile]')
+parser.add_argument('-p', '--port')
+parser.add_argument('-o', '--origin')
+parser.add_argument('-n', '--name')
+parser.add_argument('-u', '--username')
+parser.add_argument('-i', '--keyfile')
+
+args = parser.parse_args()
+
+
+# For deploying http servers
+with open('httpservers.txt', 'r') as r_file:
+    for line in r_file:
+        domain = line.split()[0]
+        process = subprocess.Popen(['ssh', '-i', './keys/ssh-ed25519-lee.chih-.priv', f'{args.username}@{domain}'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        process.communicate(b'mkdir app')
+        subprocess.run(['scp', '-i', args.keyfile, './httpserver', f'{args.username}@{domain}:app/httpserver'])
+        print(f"------Successfully deploy executable on {domain}")
+
+# For DNS server
+process = subprocess.Popen(['ssh', '-i', './keys/ssh-ed25519-lee.chih-.priv', f'{args.username}@cdn-dns.khoury.northeastern.edu'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+process.communicate(b'mkdir app')
+subprocess.run(['scp', '-i', args.keyfile, './dnsserver', f'{args.username}@cdn-dns.khoury.northeastern.edu:app/dnsserver'])
+print("------Successfully deploy DNS server")

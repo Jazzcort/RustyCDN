@@ -1,0 +1,27 @@
+#!/usr/bin/env python3
+
+import argparse, subprocess
+
+parser = argparse.ArgumentParser(
+                    prog='stopCDN',
+                    description='Shut down the CDN system',
+                    epilog='./stopCDN [-p port] [-o origin] [-n name] [-u username] [-i keyfile]')
+parser.add_argument('-p', '--port')
+parser.add_argument('-o', '--origin')
+parser.add_argument('-n', '--name')
+parser.add_argument('-u', '--username')
+parser.add_argument('-i', '--keyfile')
+
+args = parser.parse_args()
+
+with open('httpservers.txt', 'r') as r_file:
+    for line in r_file:
+        domain = line.split()[0]
+        process = subprocess.Popen(['ssh', '-i', args.keyfile, f'{args.username}@{domain}'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        process.communicate(b'screen -ls | grep \'(Detached)\' | awk \'{print $1}\' | xargs -I % -t screen -X -S % quit')
+        print(f"------Successfully stop {domain}")
+
+
+process = subprocess.Popen(['ssh', '-i', './keys/ssh-ed25519-lee.chih-.priv', f'{args.username}@cdn-dns.khoury.northeastern.edu'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+process.communicate(b'screen -ls | grep \'(Detached)\' | awk \'{print $1}\' | xargs -I % -t screen -X -S % quit')
+print("------Successfully stop DNS server")

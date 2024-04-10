@@ -1,0 +1,15 @@
+[package]
+name = "http-server"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+openssl = { version = "0.10.38", features = [ "vendored" ] }
+actix-web = "4.5.1"
+awc = { version = "3.0.0-beta.11", features = [ "openssl" ] }
+lazy_static = "=1.4.0"
+tokio = { version = "1", features = ["full"] }
+clap = { version = "4.4.18", features = ["derive"] }
+flate2 = "1.0.28"
+rayon = "1.10.0"
+sysinfo = "0.30.8"
